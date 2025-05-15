@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class UserModel extends Equatable {
   final String id;
@@ -8,15 +9,22 @@ class UserModel extends Equatable {
   final String? photoUrl;
   final List<String> favoriteBooks;
   final Map<String, int> readingProgress;
+  final bool isGuest;
+  final DateTime createdAt;
+  final DateTime updatedAt;
 
-  const UserModel({
+  UserModel({
     required this.id,
     required this.email,
     required this.name,
+    this.isGuest = false,
     this.photoUrl,
     this.favoriteBooks = const [],
     this.readingProgress = const {},
-  });
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  })  : createdAt = createdAt ?? DateTime.now(),
+        updatedAt = updatedAt ?? DateTime.now();
 
   factory UserModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
@@ -27,6 +35,9 @@ class UserModel extends Equatable {
       photoUrl: data['photoUrl'],
       favoriteBooks: List<String>.from(data['favoriteBooks'] ?? []),
       readingProgress: Map<String, int>.from(data['readingProgress'] ?? {}),
+      isGuest: data['isGuest'] ?? false,
+      createdAt: (data['createdAt'] as Timestamp?)?.toDate(),
+      updatedAt: (data['updatedAt'] as Timestamp?)?.toDate(),
     );
   }
 
@@ -37,27 +48,32 @@ class UserModel extends Equatable {
       'photoUrl': photoUrl,
       'favoriteBooks': favoriteBooks,
       'readingProgress': readingProgress,
+      'isGuest': isGuest,
+      'createdAt': Timestamp.fromDate(createdAt),
+      'updatedAt': Timestamp.fromDate(updatedAt),
     };
   }
 
-  UserModel copyWith({
-    String? id,
-    String? email,
-    String? name,
-    String? photoUrl,
-    List<String>? favoriteBooks,
-    Map<String, int>? readingProgress,
-  }) {
+  static UserModel fromFirebaseUser(User user) {
     return UserModel(
-      id: id ?? this.id,
-      email: email ?? this.email,
-      name: name ?? this.name,
-      photoUrl: photoUrl ?? this.photoUrl,
-      favoriteBooks: favoriteBooks ?? this.favoriteBooks,
-      readingProgress: readingProgress ?? this.readingProgress,
+      id: user.uid,
+      email: user.email ?? 'unknown@example.com',
+      name: user.displayName ?? 'Unknown User',
+      photoUrl: user.photoURL,
+      isGuest: false,
     );
   }
 
   @override
-  List<Object?> get props => [id, email, name, photoUrl, favoriteBooks, readingProgress];
-} 
+  List<Object?> get props => [
+        id,
+        email,
+        name,
+        photoUrl,
+        favoriteBooks,
+        readingProgress,
+        isGuest,
+        createdAt,
+        updatedAt,
+      ];
+}

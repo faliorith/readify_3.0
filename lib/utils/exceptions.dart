@@ -9,25 +9,25 @@ class AppException implements Exception {
 }
 
 class AuthException extends AppException {
-  AuthException(String message, {String? code}) : super(message, code: code);
+  AuthException(super.message, {super.code});
 }
 
 class BookException extends AppException {
-  BookException(String message, {String? code}) : super(message, code: code);
+  BookException(super.message, {super.code});
 }
 
 class NetworkException extends AppException {
-  NetworkException(String message, {String? code}) : super(message, code: code);
+  NetworkException(super.message, {super.code});
 }
 
 class ValidationException extends AppException {
-  ValidationException(String message, {String? code}) : super(message, code: code);
+  ValidationException(super.message, {super.code});
 }
 
 class StorageException extends AppException {
-  StorageException(String message, {String? code}) : super(message, code: code);
+  StorageException(super.message, {super.code});
 }
 
 class DatabaseException extends AppException {
-  DatabaseException(String message, {String? code}) : super(message, code: code);
+  DatabaseException(super.message, {super.code});
 } 

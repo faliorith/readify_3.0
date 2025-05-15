@@ -1,4 +1,8 @@
 {
+  "localeEn": "Ағылшын",
+  "localeRu": "Орыс", 
+  "localeKk": "Қазақ",
+
   "@@locale": "kk",
   "appName": "Readify",
   "@appName": {
@@ -8,6 +12,17 @@
   "@loginTitle": {
     "description": "Кіру экранындағы тақырып"
   },
+
+  "guestWarningMessage": "Сіз қонақ аккаунтын пайдаланасыз. Кейбір функциялар шектелген.",
+  "@guestWarningMessage": {
+    "description": "Қонақ аккаунты үшін ескерту"
+  },
+
+  "invalidEmail": "Дұрыс email мекенжайын енгізіңіз",
+  "@invalidEmail": {
+    "description": "Дұрыс емес email форматы үшін қате хабарламасы"
+  },
+
   "emailHint": "Email",
   "@emailHint": {
     "description": "Email енгізу өрісіне үлесім"
@@ -39,6 +54,10 @@
   "profileTab": "Профиль",
   "@profileTab": {
     "description": "Профиль қойындысының мәтіні"
+  },
+  "continueAsGuest": "Қонақ ретінде кіру",
+  "@continueAsGuest": {
+    "description": "Қонақ ретінде кіру опциясының мәтіні"
   },
   "appTitle": "Readify",
   "@appTitle": {},

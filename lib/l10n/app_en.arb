@@ -1,4 +1,11 @@
 {
+  "localeEn": "English",
+  "@localeEn": {},
+  "localeRu": "Russian",
+  "@localeRu": {}, 
+  "localeKk": "Kazakh",
+  "@localeKk": {},
+
   "@@locale": "en",
   "appName": "Readify",
   "@appName": {
@@ -40,8 +47,22 @@
   "@profileTab": {
     "description": "Text for the profile tab"
   },
+  "continueAsGuest": "Continue as Guest",
+  "@continueAsGuest": {
+    "description": "Text for guest login option"
+  },
+
+  "invalidEmail": "Please enter a valid email address",
+  "@invalidEmail": {
+    "description": "Error message for invalid email format"
+  },
+
+  "guestWarningMessage": "You're using a guest account. Some features are limited.",
+  "@guestWarningMessage": {},
   "appTitle": "Readify",
-  "@appTitle": {},
+  "@appTitle": {
+    "description": "The title of the application"
+  },
   "home": "Home",
   "@home": {},
   "search": "Search",

@@ -9,6 +9,8 @@ abstract class AuthEvent extends Equatable {
 
 class CheckAuthStatus extends AuthEvent {}
 
+class GuestLoginRequested extends AuthEvent {}
+
 class SignInRequested extends AuthEvent {
   final String email;
   final String password;
@@ -36,6 +38,7 @@ class SignUpRequested extends AuthEvent {
   @override
   List<Object> get props => [email, password, name];
 }
+
 
 class SignOutRequested extends AuthEvent {}
 

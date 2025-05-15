@@ -1,8 +1,8 @@
 {
-  "Readify": "Readify",
-  "@Readify": {
-    "description": "Название приложения"
-  },
+  "localeEn": "Английский",
+  "localeRu": "Русский",
+  "localeKk": "Казахский",
+
   "@@locale": "ru",
   "appName": "Readify",
   "@appName": {
@@ -12,6 +12,17 @@
   "@loginTitle": {
     "description": "Заголовок на экране входа"
   },
+
+  "guestWarningMessage": "Вы используете гостевую учетную запись. Некоторые функции ограничены.",
+  "@guestWarningMessage": {
+    "description": "Предупреждение для гостевой учетной записи"
+  },
+  
+  "invalidEmail": "Пожалуйста, введите корректный адрес электронной почты",
+  "@invalidEmail": {
+    "description": "Сообщение об ошибке для некорректного формата email"
+  },
+
   "emailHint": "Email",
   "@emailHint": {
     "description": "Подсказка для поля ввода email"
@@ -43,6 +54,10 @@
   "profileTab": "Профиль",
   "@profileTab": {
     "description": "Текст для вкладки профиля"
+  },
+  "continueAsGuest": "Войти как гость",
+  "@continueAsGuest": {
+    "description": "Текст для входа без регистрации"
   },
   "appTitle": "Readify",
   "@appTitle": {},

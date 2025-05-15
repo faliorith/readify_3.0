@@ -43,7 +43,7 @@ class _ProfileTabState extends State<ProfileTab> {
   void _updateProfile() {
     if (_nameController.text.isNotEmpty) {
       context.read<AuthBloc>().add(
-            UpdateProfileRequested(name: _nameController.text.trim()),
+            UpdateProfileRequested(_nameController.text.trim()),
           );
       _toggleEdit();
     }

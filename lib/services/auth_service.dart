@@ -1,12 +1,14 @@
-import 'package:firebase_auth/firebase_auth.dart'
-    show FirebaseAuth, FirebaseAuthException, User, UserCredential;
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:email_validator/email_validator.dart';
+import 'package:flutter/widgets.dart';
 import '../models/user_model.dart';
 
 class AuthService {
   final FirebaseAuth _auth;
   final FirebaseFirestore _firestore;
+
+  var currentUser;
 
   AuthService({
     required FirebaseAuth firebaseAuth,
@@ -14,57 +16,56 @@ class AuthService {
   })  : _auth = firebaseAuth,
         _firestore = firestore;
 
-  User? get currentUser => _auth.currentUser;
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
-  // Получение профиля пользователя
   Future<UserModel?> getCurrentUser() async {
     try {
-      final user = currentUser;
+      final user = _auth.currentUser;
       if (user != null) {
         final doc = await _firestore.collection('users').doc(user.uid).get();
         if (doc.exists) return UserModel.fromFirestore(doc);
       }
       return null;
     } catch (e) {
-      throw Exception('Ошибка получения данных: ${e.toString()}');
+      throw Exception('Failed to get user: ${e.toString()}');
     }
   }
 
-  // Вход
-  Future<UserCredential> signInWithEmailAndPassword(
+  Future<UserModel> signInWithEmailAndPassword(
     String email,
     String password,
   ) async {
     try {
       if (!EmailValidator.validate(email)) {
-        throw Exception('Неверный email');
+        throw Exception('Invalid email format');
       }
 
-      return await _auth.signInWithEmailAndPassword(
+      final credential = await _auth.signInWithEmailAndPassword(
         email: email.trim(),
         password: password.trim(),
       );
+      
+      final doc = await _firestore.collection('users').doc(credential.user!.uid).get();
+      return UserModel.fromFirestore(doc);
     } on FirebaseAuthException catch (e) {
       throw _handleAuthException(e);
     } catch (e) {
-      throw Exception('Ошибка входа: ${e.toString()}');
+      throw Exception('Login failed: ${e.toString()}');
     }
   }
 
-  // Регистрация
-  Future<UserCredential> registerWithEmailAndPassword(
+  Future<UserModel> registerWithEmailAndPassword(
     String email,
     String password, {
     String? name,
   }) async {
     try {
       if (!EmailValidator.validate(email)) {
-        throw Exception('Неверный email');
+        throw Exception('Invalid email format');
       }
 
       if (password.length < 6) {
-        throw Exception('Пароль слишком короткий');
+        throw Exception('Password must be at least 6 characters');
       }
 
       final credential = await _auth.createUserWithEmailAndPassword(
@@ -72,50 +73,72 @@ class AuthService {
         password: password.trim(),
       );
 
-      if (credential.user == null) {
-        throw Exception('Ошибка создания пользователя');
-      }
+      final user = UserModel(
+        id: credential.user!.uid,
+        email: email.trim(),
+        name: name?.trim() ?? email.split('@')[0],
+        isGuest: false,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
 
-      await _firestore.collection('users').doc(credential.user!.uid).set({
-        'email': email.trim(),
-        'name': name?.trim() ?? email.split('@')[0],
-        'createdAt': FieldValue.serverTimestamp(),
-        'updatedAt': FieldValue.serverTimestamp(),
-        'emailVerified': false,
-      });
-
-      return credential;
+      await _firestore.collection('users').doc(user.id).set(user.toMap());
+      return user;
     } on FirebaseAuthException catch (e) {
       throw _handleAuthException(e);
     } catch (e) {
-      throw Exception('Ошибка регистрации: ${e.toString()}');
+      throw Exception('Registration failed: ${e.toString()}');
     }
   }
 
-  // Выход из аккаунта
+Future<UserModel> createGuestUser() async {
+  try {
+    // Создаем уникальный ID для гостя
+    final guestId = 'guest_${DateTime.now().millisecondsSinceEpoch}';
+
+    // Создаем объект UserModel для гостя
+    final guestUser = UserModel(
+      id: guestId,
+      email: 'guest@example.com',
+      name: 'Guest',
+      isGuest: true,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+      photoUrl: null,
+      favoriteBooks: [],
+      readingProgress: {},
+    );
+
+    // Сохраняем гостя в Firestore
+    await _firestore.collection('users').doc(guestUser.id).set(guestUser.toMap());
+
+    return guestUser;
+  } catch (e) {
+    debugPrint('Error creating guest user: $e');
+    throw Exception('Failed to create guest account');
+  }
+}
+
   Future<void> signOut() async {
     try {
       await _auth.signOut();
     } catch (e) {
-      throw Exception('Ошибка выхода: ${e.toString()}');
+      throw Exception('Logout failed: ${e.toString()}');
     }
   }
 
-  // Сброс пароля
   Future<void> resetPassword(String email) async {
     try {
       if (!EmailValidator.validate(email)) {
-        throw Exception('Неверный формат email');
+        throw Exception('Invalid email format');
       }
-
       await _auth.sendPasswordResetEmail(email: email.trim());
     } catch (e) {
-      throw Exception('Ошибка сброса пароля: ${e.toString()}');
+      throw Exception('Password reset failed: ${e.toString()}');
     }
   }
 
-  // Обновление профиля пользователя
-  Future<void> updateProfile({
+  Future<UserModel> updateProfile({
     required String userId,
     String? name,
     String? photoUrl,
@@ -129,12 +152,13 @@ class AuthService {
       if (photoUrl != null) updates['photoUrl'] = photoUrl.trim();
 
       await _firestore.collection('users').doc(userId).update(updates);
+      final updatedDoc = await _firestore.collection('users').doc(userId).get();
+      return UserModel.fromFirestore(updatedDoc);
     } catch (e) {
-      throw Exception('Ошибка обновления профиля: ${e.toString()}');
+      throw Exception('Profile update failed: ${e.toString()}');
     }
   }
 
-  // Отправка письма с верификацией email
   Future<void> sendEmailVerification() async {
     try {
       final user = _auth.currentUser;
@@ -142,40 +166,38 @@ class AuthService {
         await user.sendEmailVerification();
       }
     } catch (e) {
-      throw Exception('Ошибка отправки письма: ${e.toString()}');
+      throw Exception('Email verification failed: ${e.toString()}');
     }
   }
 
-  // Принудительное обновление данных пользователя из Firebase
   Future<void> reloadUser() async {
     try {
       await _auth.currentUser?.reload();
     } catch (e) {
-      throw Exception('Ошибка обновления пользователя: ${e.toString()}');
+      throw Exception('User reload failed: ${e.toString()}');
     }
   }
 
-  // Обработка ошибок Firebase Auth
   Exception _handleAuthException(FirebaseAuthException e) {
     switch (e.code) {
       case 'user-not-found':
-        return Exception('Пользователь не найден');
+        return Exception('User not found');
       case 'wrong-password':
-        return Exception('Неверный пароль');
+        return Exception('Wrong password');
       case 'email-already-in-use':
-        return Exception('Email уже используется');
+        return Exception('Email already in use');
       case 'invalid-email':
-        return Exception('Неверный формат email');
+        return Exception('Invalid email format');
       case 'weak-password':
-        return Exception('Пароль слишком простой');
+        return Exception('Weak password');
       case 'user-disabled':
-        return Exception('Аккаунт заблокирован');
+        return Exception('Account disabled');
       case 'operation-not-allowed':
-        return Exception('Операция не разрешена');
+        return Exception('Operation not allowed');
       case 'too-many-requests':
-        return Exception('Слишком много запросов. Попробуйте позже');
+        return Exception('Too many requests. Try again later');
       default:
-        return Exception('Произошла ошибка: ${e.message}');
+        return Exception('Error: ${e.message}');
     }
   }
 }

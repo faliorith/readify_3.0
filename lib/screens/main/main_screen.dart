@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:readify/widgets/guest_warning_banner.dart';
+import 'package:readify/widgets/language_switcher.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/auth_state.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -34,9 +36,21 @@ class _MainScreenState extends State<MainScreen> {
         }
 
         return Scaffold(
-          body: IndexedStack(
-            index: _currentIndex,
-            children: _tabs,
+          appBar: AppBar(
+            title: Text(AppLocalizations.of(context)!.appTitle),
+            actions: const [LanguageSwitcher()],
+          ),
+          body: Column(
+            children: [
+              // Баннер для гостевого пользователя
+              if (state.user.isGuest) const GuestWarningBanner(),
+              Expanded(
+                child: IndexedStack(
+                  index: _currentIndex,
+                  children: _tabs,
+                ),
+              ),
+            ],
           ),
           bottomNavigationBar: NavigationBar(
             selectedIndex: _currentIndex,
@@ -68,4 +82,4 @@ class _MainScreenState extends State<MainScreen> {
       },
     );
   }
-} 
+}
