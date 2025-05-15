@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Book cover -->
+    <rect x="212" y="112" width="600" height="800" rx="20" fill="#4A90E2"/>
+    <!-- Book pages -->
+    <rect x="232" y="132" width="560" height="760" rx="10" fill="white"/>
+    <!-- Book spine -->
+    <rect x="212" y="112" width="40" height="800" rx="10" fill="#357ABD"/>
+    <!-- Book title -->
+    <text x="512" y="512" font-family="Arial" font-size="120" fill="#4A90E2" text-anchor="middle">R</text>
+</svg> 
